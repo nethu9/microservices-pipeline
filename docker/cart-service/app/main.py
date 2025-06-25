@@ -2,6 +2,6 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/cart")
+@app.get("/carts")
 def read_cart():
-    return {"cart": ["item1", "item2"]}
+    return {"cart": ["item1", "item2"}
