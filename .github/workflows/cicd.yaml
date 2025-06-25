@@ -23,7 +23,7 @@ jobs:
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
-          projectBaseDir: ./docker/cart-serivce
+          projectBaseDir: docker/cart-serivce
         env:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
           SONAR_URL: "https://sonarcloud.io"
