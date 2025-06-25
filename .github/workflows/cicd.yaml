@@ -26,8 +26,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=nethuy_cart-service
-            -Dsonar.organization=nethuy
+            -Dsonar.projectKey=nethu9_nethu
+            -Dsonar.organization=nethu9
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.projectBaseDir=docker/cart-service
 
