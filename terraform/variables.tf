@@ -21,3 +21,7 @@ variable "k8s-key-path" {
 variable "k8s-key" {
   default = "k8s-key"
 }
+
+variable "runner_instance_type" {
+  default = "ami-05ffe3c48a9991133"
+}
