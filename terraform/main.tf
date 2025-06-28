@@ -45,3 +45,13 @@ resource "aws_instance" "woker" {
     Name = "worker-${count.index + 1}"
   }
 }
+
+resource "aws_instance" "git_runner" {
+  ami                    = var.ami
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.deployer.key_name
+  vpc_security_group_ids = [aws_security_group.k8s-sg.id]
+  tags = {
+    Name = "GIT-Runner"
+  }
+}
