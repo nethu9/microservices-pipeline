@@ -38,3 +38,13 @@ jobs:
         run: |
           docker build -t nethuy/cart-service:latest docker/cart-service
           docker push nethuy/cart-service:latest
+      - name: Install HELM
+        uses: azure/setup-helm@v4
+      - name: Configure KubeConfig
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+      - name: Deploy the HELM Chart
+        run: |
+          helm upgrade --install cart-service ./helm/chartService --namespace default

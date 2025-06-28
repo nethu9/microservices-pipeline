@@ -1,0 +1,3 @@
+docker:
+  image: nethuy/cart-service
+  tag: latest
