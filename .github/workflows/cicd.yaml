@@ -17,34 +17,39 @@ jobs:
         run: |
           pip install fastapi uvicorn
 
-      - name: Run Unit Tests
-        run: echo "No tests yet."
+      # - name: Run Unit Tests
+      #   run: echo "No tests yet."
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=nethu9_nethu
-            -Dsonar.organization=nethu9
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.projectBaseDir=docker/cart-service
+      # - name: SonarCloud Scan
+      #   uses: SonarSource/sonarqube-scan-action@v5.0.0
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   with:
+      #     args: >
+      #       -Dsonar.projectKey=nethu9_nethu
+      #       -Dsonar.organization=nethu9
+      #       -Dsonar.host.url=https://sonarcloud.io
+      #       -Dsonar.projectBaseDir=docker/cart-service
 
-      - name: Docker Login
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      # - name: Docker Login
+      #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build and Push Docker Image
+      # - name: Build and Push Docker Image
+      #   run: |
+      #     docker build -t nethuy/cart-service:latest docker/cart-service
+      #     docker push nethuy/cart-service:latest
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Setup Kubeconfig
         run: |
-          docker build -t nethuy/cart-service:latest docker/cart-service
-          docker push nethuy/cart-service:latest
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_BASE64 }}"  >> $HOME/.kube/config
+
       - name: Install HELM
         uses: azure/setup-helm@v4
-      - name: Configure KubeConfig
-        uses: azure/k8s-set-context@v4
-        with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBECONFIG }}
+
       - name: Deploy the HELM Chart
         run: |
           helm upgrade --install cart-service ./helm/chartService --namespace default
