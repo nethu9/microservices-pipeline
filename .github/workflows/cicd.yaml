@@ -46,6 +46,10 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBECONFIG }}"  > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Verify Kubernetes connection
+        run: kubectl cluster-info
 
       - name: Install HELM
         uses: azure/setup-helm@v4
