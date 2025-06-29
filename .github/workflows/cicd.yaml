@@ -8,14 +8,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+      # - name: Setup Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: '3.11'
+
+      # - name: Install Dependencies
+      #   run: |
+      #     pip install fastapi uvicorn
 
       - name: Install Dependencies
         run: |
-          pip install fastapi uvicorn
+          python3.11 -m pip install --upgrade pip
+          python3.11 -m pip install fastapi uvicorn
 
       # - name: Run Unit Tests
       #   run: echo "No tests yet."
