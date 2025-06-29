@@ -48,7 +48,7 @@ resource "aws_instance" "woker" {
 
 resource "aws_instance" "git_runner" {
   ami                    = var.runner_instance_type
-  instance_type          = var.instance_type
+  instance_type          = var.runner_type
   key_name               = aws_key_pair.deployer.key_name
   vpc_security_group_ids = [aws_security_group.k8s-sg.id]
   tags = {
