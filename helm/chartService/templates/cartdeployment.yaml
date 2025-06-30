@@ -18,4 +18,4 @@ spec:
       - name: cart-service
         image: "{{ .Values.docker.image }}:{{ .Values.docker.tag }}"
         ports:
-        - containerPort: 80
+        - containerPort: 3000
