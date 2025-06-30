@@ -8,41 +8,32 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # - name: Setup Python
-      #   uses: actions/setup-python@v4
-      #   with:
-      #     python-version: '3.11'
-
-      # - name: Install Dependencies
-      #   run: |
-      #     pip install fastapi uvicorn
-
       - name: Install Dependencies
         run: |
           python3.11 -m pip install --upgrade pip
           python3.11 -m pip install fastapi uvicorn
 
-      # - name: Run Unit Tests
-      #   run: echo "No tests yet."
+      - name: Run Unit Tests
+        run: echo "No tests yet."
 
-      # - name: SonarCloud Scan
-      #   uses: SonarSource/sonarqube-scan-action@v5.0.0
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   with:
-      #     args: >
-      #       -Dsonar.projectKey=nethu9_nethu
-      #       -Dsonar.organization=nethu9
-      #       -Dsonar.host.url=https://sonarcloud.io
-      #       -Dsonar.projectBaseDir=docker/cart-service
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=nethu9_nethu
+            -Dsonar.organization=nethu9
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.projectBaseDir=docker/cart-service
 
-      # - name: Docker Login
-      #   run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Docker Login
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # - name: Build and Push Docker Image
-      #   run: |
-      #     docker build -t nethuy/cart-service:latest docker/cart-service
-      #     docker push nethuy/cart-service:latest
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t nethuy/cart-service:latest docker/cart-service
+          docker push nethuy/cart-service:latest
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
@@ -55,7 +46,13 @@ jobs:
 
       - name: Verify Kubernetes connection
         run: kubectl cluster-info
-      
+
+      - name: Install Argo Rollouts CLI
+        run: |
+          curl -sLO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+          chmod +x ./kubectl-argo-rollouts-linux-amd64
+          mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+
       - name: Install Argo Rollouts
         run: |
           kubectl create namespace argo-rollouts --dry-run=client -o yaml | kubectl apply -f -
