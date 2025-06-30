@@ -55,6 +55,14 @@ jobs:
 
       - name: Verify Kubernetes connection
         run: kubectl cluster-info
+      
+      - name: Install Argo Rollouts
+        run: |
+          kubectl apply -n argo-rollouts --create-namespace -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+      - name: Verify Argo Rollouts Installation
+        run: |
+          kubectl get deployment -n argo-rollouts
 
       - name: Install HELM
         uses: azure/setup-helm@v4
