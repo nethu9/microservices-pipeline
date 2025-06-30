@@ -20,7 +20,7 @@ spec:
           image: "{{ .Values.docker.image }}:{{ .Values.docker.tag }}"
           ports:
             - containerPort: 8000
-              name: HTTP
+              name: http
   strategy:
     canary:
       steps:
