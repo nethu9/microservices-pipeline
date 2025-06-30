@@ -19,3 +19,4 @@ spec:
         image: "{{ .Values.docker.image }}:{{ .Values.docker.tag }}"
         ports:
         - containerPort: 3000
+          name: http
