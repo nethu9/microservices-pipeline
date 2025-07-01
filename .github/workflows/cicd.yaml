@@ -164,6 +164,10 @@ jobs:
           docker build -t nethuy/order-service:latest docker/order-service
           docker push nethuy/order-service:latest
 
+  kubernetes-argo-helm-setup:
+    runs-on: self-hosted
+    needs: [build-test-analyze, sonarcloud-scan, docker-deploy]
+    steps:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
 
