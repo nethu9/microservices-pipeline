@@ -128,27 +128,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set Sonar project key
-        id: set-sonar-key
-        run: |
-          if [[ "${{ matrix.service }}" == "cart" ]]; then
-            echo "SONAR_KEY=${{ secrets.SONAR_KEY_CART }}" >> $GITHUB_OUTPUT
-          elif [[ "${{ matrix.service }}" == "product" ]]; then
-            echo "SONAR_KEY=${{ secrets.SONAR_KEY_PRODUCT }}" >> $GITHUB_OUTPUT
-          elif [[ "${{ matrix.service }}" == "order" ]]; then
-            echo "SONAR_KEY=${{ secrets.SONAR_KEY_ORDER }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: SonarCloud Scan - ${{ matrix.service }}
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=${{ steps.set-sonar-key.outputs.SONAR_KEY }}
+            -Dsonar.projectKey=${{ secrets.SONAR_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORG }}
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.projectBaseDir=docker/${{ matrix.service }}-service
+
 
   docker-deploy:
     runs-on: self-hosted
