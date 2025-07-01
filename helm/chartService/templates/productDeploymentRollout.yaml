@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+    name: product-rollout
+    labels:
+        app: product
+spec:
+    replicas: 3
+    revisionHistoryLimit: 3
+    selector:
+        matchLabels:
+            app: product
+    template:
+        metadata:
+            labels:
+                app: product
+        spec:
+            containers:
+                - name: product-service
+                  image: "{{ .Values.product.image }}:{{ .Values.product.tag }}"
+                  ports:
+                    - containerPort: 8000
+                      name: http
+    strategy:
+        canary:
+            steps:
+                - setWeight: 20
+                - pause: {}
+                - setWeight: 40
+                - pause: { duration: 10s }
+                - setWeight: 60
+                - pause: { duration: 10s }
+                - setWeight: 80
+                - pause { duration: 10s }

@@ -1,6 +1,12 @@
-docker:
+cart:
   image: nethuy/cart-service
   tag: latest
-canary:
+canary-test:
   image: nethuy/product-service
+  tag: latest
+product: 
+  image: nethuy/product-service
+  tag: latest
+order:
+  image: nethuy/order-service
   tag: latest

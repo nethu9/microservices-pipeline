@@ -1,7 +1,111 @@
+# name: CI/CD Pipeline
+# on:
+#   push:
+#     branches: ["master"]
+# jobs:
+#   build-test-analyze:
+#     runs-on: self-hosted
+#     steps:
+#       - uses: actions/checkout@v3
+
+#       - name: Install Dependencies
+#         run: |
+#           python3.11 -m pip install --upgrade pip
+#           python3.11 -m pip install fastapi uvicorn
+
+#       - name: Run Unit Tests
+#         run: echo "No tests yet."
+
+#   sonarcloud-scan:
+#     runs-on: self-hosted
+#     strategy:
+#       matrix:
+#         service: [cart, product, order]
+#     steps:
+#       - uses: actions/checkout@v3
+
+#       - name: SonarCloud Scan - ${{ matrix.service }}
+#         uses: SonarSource/sonarqube-scan-action@v5.0.0
+#         env:
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#         with:
+#           args: >
+#             -Dsonar.projectKey=${{ secrets[format('SONAR_KEY_{0}', upper(matrix.service))] }}
+#             -Dsonar.organization=${{ secrets.SONAR_ORG }}
+#             -Dsonar.host.url=https://sonarcloud.io
+#             -Dsonar.projectBaseDir=docker/${{ matrix.service }}-service
+
+#       # - name: SonarCloud Scan
+#       #   uses: SonarSource/sonarqube-scan-action@v5.0.0
+#       #   env:
+#       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#       #   with:
+#       #     args: >
+#       #       -Dsonar.projectKey=${{ secrets.SONAR_KEY }}
+#       #       -Dsonar.organization=${{ secrets.SONAR_ORG }}
+#       #       -Dsonar.host.url=https://sonarcloud.io
+#       #       -Dsonar.projectBaseDir=docker/cart-service
+
+#       - name: Docker Login
+#         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+#       - name: Build and Push Docker Image for Cart Service
+#         run: |
+#           docker build -t nethuy/cart-service:latest docker/cart-service
+#           docker push nethuy/cart-service:latest
+
+#       - name: Build and Push Docker Image for Product Service
+#         run: |
+#           docker build -t nethuy/product-service:latest docker/product-service
+#           docker push nethuy/product-service:latest
+
+#       - name: Build and Push Docker Image for Order Service
+#         run: |
+#           docker build -t nethuy/order-service:latest docker/order-service
+#           docker push nethuy/order-service:latest
+
+#       - name: Setup kubectl
+#         uses: azure/setup-kubectl@v3
+
+#       - name: Setup Kubeconfig
+#         run: |
+#           mkdir -p $HOME/.kube
+#           echo "${{ secrets.KUBECONFIG }}"  > $HOME/.kube/config
+#           chmod 600 $HOME/.kube/config
+
+#       - name: Verify Kubernetes connection
+#         run: kubectl cluster-info
+
+#       - name: Install Argo Rollouts CLI
+#         run: |
+#           mkdir -p ~/.local/bin
+#           curl -sLO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+#           chmod +x ./kubectl-argo-rollouts-linux-amd64
+#           mv ./kubectl-argo-rollouts-linux-amd64 ~/.local/bin/kubectl-argo-rollouts
+#           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+#       - name: Install Argo Rollouts
+#         run: |
+#           kubectl create namespace argo-rollouts --dry-run=client -o yaml | kubectl apply -f -
+#           kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+#       - name: Verify Argo Rollouts Installation
+#         run: |
+#           kubectl get deployment -n argo-rollouts
+
+#       - name: Install HELM
+#         uses: azure/setup-helm@v4
+
+#       - name: Deploy the HELM Chart
+#         run: |
+#           helm upgrade --install cart-service ./helm/chartService --namespace default
+
 name: CI/CD Pipeline
+
 on:
   push:
     branches: ["master"]
+
 jobs:
   build-test-analyze:
     runs-on: self-hosted
@@ -16,16 +120,30 @@ jobs:
       - name: Run Unit Tests
         run: echo "No tests yet."
 
-      - name: SonarCloud Scan
+  sonarcloud-scan:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        service: [cart, product, order]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: SonarCloud Scan - ${{ matrix.service }}
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=nethu9_nethu
-            -Dsonar.organization=nethu9
+            -Dsonar.projectKey=${{ secrets[format('SONAR_KEY_{0}', upper(matrix.service))] }}
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.projectBaseDir=docker/cart-service
+            -Dsonar.projectBaseDir=docker/${{ matrix.service }}-service
+
+  docker-deploy:
+    runs-on: self-hosted
+    needs: [build-test-analyze, sonarcloud-scan]
+    steps:
+      - uses: actions/checkout@v3
 
       - name: Docker Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -40,13 +158,18 @@ jobs:
           docker build -t nethuy/product-service:latest docker/product-service
           docker push nethuy/product-service:latest
 
+      - name: Build and Push Docker Image for Order Service
+        run: |
+          docker build -t nethuy/order-service:latest docker/order-service
+          docker push nethuy/order-service:latest
+
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
 
       - name: Setup Kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}"  > $HOME/.kube/config
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
       - name: Verify Kubernetes connection
